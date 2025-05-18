@@ -1,52 +1,61 @@
 {
   "images" : [
     {
+      "filename" : "rsz_1rsz_1rsz_1rsz_1rsz_lightbulb05x.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "16x16"
     },
     {
+      "filename" : "rsz_1rsz_1rsz_1rsz_lightbulb05x 1.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "16x16"
     },
     {
+      "filename" : "rsz_1rsz_1rsz_1rsz_lightbulb05x.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "32x32"
     },
     {
+      "filename" : "rsz_1rsz_1rsz_lightbulb05x.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "32x32"
     },
     {
+      "filename" : "rsz_1rsz_lightbulb05x.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "128x128"
     },
     {
+      "filename" : "rsz_lightbulb05x 1.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "128x128"
     },
     {
+      "filename" : "rsz_lightbulb05x 2.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "256x256"
     },
     {
+      "filename" : "LIGHTBULB@0.5x.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "256x256"
     },
     {
+      "filename" : "LIGHTBULB@0.5x 1.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "512x512"
     },
     {
-      "filename" : "983D2355-9B54-4628-A086-5061F5AB81DB.png",
+      "filename" : "LIGHTBULB.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "512x512"
