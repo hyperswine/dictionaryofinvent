@@ -83,7 +83,8 @@ struct ContentView: View {
         let q = searchText.lowercased()
         return inventions.filter {
             ($0.title ?? "").lowercased().contains(q) ||
-            ($0.details ?? "").lowercased().contains(q)
+            ($0.details ?? "").lowercased().contains(q) ||
+            ($0.linkString ?? "").lowercased().contains(q)
         }
     }
 
@@ -128,11 +129,18 @@ struct EntryCard: View {
             }
         }
         .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity,
+               minHeight: 160, maxHeight: 160,
+               alignment: .topLeading)              // fixed height cards
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(.gray.opacity(0.25))
+                .fill(Color(.windowBackgroundColor))
         )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(.gray.opacity(0.20))
+        )
+        .shadow(radius: 2)
         .contentShape(Rectangle())
     }
 }
