@@ -19,6 +19,11 @@ struct ContentView: View {
 
     @State private var searchText = ""
 
+    // Grid definition for the detail pane
+    private let columns: [GridItem] = [
+        GridItem(.adaptive(minimum: 260), spacing: 16)
+    ]
+
     var body: some View {
         NavigationSplitView {
             // Sidebar list – searchable
@@ -40,20 +45,14 @@ struct ContentView: View {
                 }
             }
         } detail: {
-            // Simple details pane for now
-            if let selected = inventions.first {  // placeholder
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(selected.title ?? "Untitled")
-                        .font(.title2)
-                    Text(selected.details ?? "")
-                    if let s = selected.linkString,
-                       let url = URL(string: s) {
-                        Link(s, destination: url)
+            // Grid of cards showing (filtered) inventions
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(filtered) { inv in
+                        EntryCard(invention: inv)
                     }
                 }
                 .padding()
-            } else {
-                Text("Select an invention")
             }
         }
     }
@@ -79,5 +78,39 @@ struct ContentView: View {
     private func delete(_ offsets: IndexSet) {
         offsets.map { filtered[$0] }.forEach(viewContext.delete)
         try? viewContext.save()
+    }
+}
+
+// MARK: - Card view used in the grid
+struct EntryCard: View {
+    let invention: Invention
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(invention.title ?? "Untitled")
+                .font(.headline)
+                .lineLimit(2)
+
+            Text(invention.details ?? "")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .lineLimit(4)
+
+            if let s = invention.linkString,
+               let url = URL(string: s) {
+                Link(destination: url) {
+                    Text(s)
+                        .font(.footnote)
+                        .underline()
+                        .lineLimit(1)
+                }
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(.gray.opacity(0.25))
+        )
     }
 }
