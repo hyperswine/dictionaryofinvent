@@ -60,11 +60,13 @@ struct ContentView: View {
                 HStack(spacing: 12) {
                     TextField("Search inventions…", text: $searchText)
                         .textFieldStyle(.roundedBorder)
+                        .font(.title2)
                         .frame(width: 320)
 
                     Button(action: add) {
                         Image(systemName: "plus")
                     }
+                    .font(.title2)
                     .keyboardShortcut("n", modifiers: [.command])
                 }
             }
@@ -105,11 +107,11 @@ struct EntryCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(invention.title ?? "Untitled")
-                .font(.headline)
+                .font(.title3)
                 .lineLimit(2)
 
             Text(invention.details ?? "")
-                .font(.subheadline)
+                .font(.body)
                 .foregroundStyle(.secondary)
                 .lineLimit(4)
 
@@ -117,7 +119,7 @@ struct EntryCard: View {
                let url = URL(string: s) {
                 Link(destination: url) {
                     Text(s)
-                        .font(.footnote)
+                        .font(.callout)
                         .underline()
                         .lineLimit(1)
                 }
@@ -156,11 +158,13 @@ struct EditInventionView: View {
                 set: { invention.title = $0 }
             ))
             .textFieldStyle(.roundedBorder)
+            .font(.title3)
 
             TextEditor(text: Binding(
                 get: { invention.details ?? "" },
                 set: { invention.details = $0 }
             ))
+            .padding(6)
             .frame(height: 160)
             .overlay(RoundedRectangle(cornerRadius: 8).stroke(.secondary))
 
