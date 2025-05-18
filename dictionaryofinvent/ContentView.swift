@@ -29,27 +29,25 @@ struct ContentView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Top bar with search field and Add button
-            HStack(alignment: .center, spacing: 12) {
-                TextField("Search inventions…", text: $searchText)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(maxWidth: 320)
-
+            HStack(spacing: 16) {
                 Spacer()
 
-                Button {
-                    add()
-                } label: {
+                TextField("Search inventions…", text: $searchText)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(maxWidth: 480)
+                    .font(.title3)                    // larger text
+
+                Spacer(minLength: 0)
+
+                Button(action: add) {
                     Label("Add", systemImage: "plus")
+                        .labelStyle(.titleAndIcon)
                 }
                 .keyboardShortcut("n", modifiers: [.command])
             }
-            .padding([.horizontal, .top])
-            .padding(.bottom, 4)
+            .padding(.vertical, 12)
+            .padding(.horizontal)
 
-            Divider()
-
-            // Grid of cards
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(filtered) { inv in
@@ -58,7 +56,7 @@ struct ContentView: View {
                         } label: {
                             EntryCard(invention: inv)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(ScaleButtonStyle())
                         .contextMenu {
                             Button(role: .destructive) {
                                 delete(inv)
@@ -69,6 +67,7 @@ struct ContentView: View {
                     }
                 }
                 .padding()
+                .animation(.easeInOut(duration: 0.25), value: filtered)
             }
         }
         .sheet(item: $editing) { inv in
@@ -106,6 +105,7 @@ struct ContentView: View {
 // MARK: - Card view used in the grid
 struct EntryCard: View {
     let invention: Invention
+    @State private var hovering = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -131,17 +131,20 @@ struct EntryCard: View {
         .padding()
         .frame(maxWidth: .infinity,
                minHeight: 160, maxHeight: 160,
-               alignment: .topLeading)              // fixed height cards
+               alignment: .topLeading)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.windowBackgroundColor))
+                .fill(hovering ? Color.secondary.opacity(0.15)
+                                : Color(.windowBackgroundColor))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(.gray.opacity(0.20))
         )
-        .shadow(radius: 2)
+        .shadow(radius: hovering ? 4 : 2)
         .contentShape(Rectangle())
+        .onHover { hovering = $0 }
+        .animation(.easeInOut(duration: 0.15), value: hovering)
     }
 }
 
@@ -183,5 +186,14 @@ struct EditInventionView: View {
         }
         .padding()
         .frame(minWidth: 400)
+    }
+}
+
+// MARK: - Helpers
+struct ScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
     }
 }
