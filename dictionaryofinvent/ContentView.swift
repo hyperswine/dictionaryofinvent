@@ -166,7 +166,15 @@ struct EditInventionView: View {
             ))
             .padding(6)
             .frame(height: 160)
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(.secondary))
+            .scrollContentBackground(.hidden)            // hide native dark bg
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(.textBackgroundColor))   // light fill like text fields
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(.secondary)                  // same subtle border
+            )
 
             TextField("Link (optional)", text: Binding(
                 get: { invention.linkString ?? "" },
