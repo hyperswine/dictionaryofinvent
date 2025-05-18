@@ -19,6 +19,9 @@ struct ContentView: View {
 
     @State private var searchText = ""
 
+    /// When non‑nil, shows the edit sheet for this invention
+    @State private var editing: Invention?
+
     // Grid definition for the detail pane
     private let columns: [GridItem] = [
         GridItem(.adaptive(minimum: 260), spacing: 16)
@@ -49,11 +52,20 @@ struct ContentView: View {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(filtered) { inv in
-                        EntryCard(invention: inv)
+                        Button {
+                            editing = inv
+                        } label: {
+                            EntryCard(invention: inv)
+                        }
+                        .buttonStyle(.plain)   // no blue highlight
                     }
                 }
                 .padding()
             }
+        }
+        .sheet(item: $editing) { inv in
+            EditInventionView(invention: inv)
+                .environment(\.managedObjectContext, viewContext)
         }
     }
 
@@ -73,6 +85,7 @@ struct ContentView: View {
         new.details = ""
         new.createdAt = .now
         try? viewContext.save()
+        editing = new            // open sheet
     }
 
     private func delete(_ offsets: IndexSet) {
@@ -112,5 +125,46 @@ struct EntryCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(.gray.opacity(0.25))
         )
+    }
+}
+
+// MARK: - Edit sheet
+struct EditInventionView: View {
+    @ObservedObject var invention: Invention
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.managedObjectContext) private var ctx
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            TextField("Title", text: Binding(
+                get: { invention.title ?? "" },
+                set: { invention.title = $0 }
+            ))
+            .textFieldStyle(.roundedBorder)
+
+            TextEditor(text: Binding(
+                get: { invention.details ?? "" },
+                set: { invention.details = $0 }
+            ))
+            .frame(height: 160)
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(.secondary))
+
+            TextField("Link (optional)", text: Binding(
+                get: { invention.linkString ?? "" },
+                set: { invention.linkString = $0 }
+            ))
+            .textFieldStyle(.roundedBorder)
+
+            HStack {
+                Spacer()
+                Button("Done") {
+                    try? ctx.save()
+                    dismiss()
+                }
+                .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding()
+        .frame(minWidth: 400)
     }
 }
