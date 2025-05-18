@@ -28,27 +28,28 @@ struct ContentView: View {
     ]
 
     var body: some View {
-        NavigationSplitView {
-            // Sidebar list – searchable
-            List {
-                ForEach(filtered) { inv in
-                    NavigationLink(value: inv.objectID) {
-                        Text(inv.title ?? "Untitled")
-                    }
+        VStack(alignment: .leading, spacing: 0) {
+            // Top bar with search field and Add button
+            HStack(alignment: .center, spacing: 12) {
+                TextField("Search inventions…", text: $searchText)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(maxWidth: 320)
+
+                Spacer()
+
+                Button {
+                    add()
+                } label: {
+                    Label("Add", systemImage: "plus")
                 }
-                .onDelete(perform: delete)
+                .keyboardShortcut("n", modifiers: [.command])
             }
-            .searchable(text: $searchText, prompt: "Search inventions…")
-            .navigationTitle("Inventions")
-            .toolbar {
-                ToolbarItem {
-                    Button { add() } label: {
-                        Label("Add", systemImage: "plus")
-                    }
-                }
-            }
-        } detail: {
-            // Grid of cards showing (filtered) inventions
+            .padding([.horizontal, .top])
+            .padding(.bottom, 4)
+
+            Divider()
+
+            // Grid of cards
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(filtered) { inv in
@@ -57,7 +58,14 @@ struct ContentView: View {
                         } label: {
                             EntryCard(invention: inv)
                         }
-                        .buttonStyle(.plain)   // no blue highlight
+                        .buttonStyle(.plain)
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                delete(inv)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
                     }
                 }
                 .padding()
@@ -87,9 +95,9 @@ struct ContentView: View {
         try? viewContext.save()
         editing = new            // open sheet
     }
-
-    private func delete(_ offsets: IndexSet) {
-        offsets.map { filtered[$0] }.forEach(viewContext.delete)
+    
+    private func delete(_ invention: Invention) {
+        viewContext.delete(invention)
         try? viewContext.save()
     }
 }
@@ -125,6 +133,7 @@ struct EntryCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(.gray.opacity(0.25))
         )
+        .contentShape(Rectangle())
     }
 }
 
