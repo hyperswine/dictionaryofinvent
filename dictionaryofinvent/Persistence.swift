@@ -14,9 +14,12 @@ struct PersistenceController {
     static let preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
-        for _ in 0..<10 {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
+        for i in 0..<10 {
+            let inv = Invention(context: viewContext)
+            inv.title = "Sample \(i)"
+            inv.details = "Prototype description…"
+            inv.linkString = "https://example.com/\(i)"
+            inv.createdAt = .now
         }
         do {
             try viewContext.save()

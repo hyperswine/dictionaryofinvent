@@ -11,73 +11,73 @@ import CoreData
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
+    // Sort alphabetically by title; change to `createdAt` if you prefer chronological.
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \Invention.title, ascending: true)],
         animation: .default)
-    private var items: FetchedResults<Item>
+    private var inventions: FetchedResults<Invention>
+
+    @State private var searchText = ""
 
     var body: some View {
-        NavigationView {
+        NavigationSplitView {
+            // Sidebar list – searchable
             List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
+                ForEach(filtered) { inv in
+                    NavigationLink(value: inv.objectID) {
+                        Text(inv.title ?? "Untitled")
                     }
                 }
-                .onDelete(perform: deleteItems)
+                .onDelete(perform: delete)
             }
+            .searchable(text: $searchText, prompt: "Search inventions…")
+            .navigationTitle("Inventions")
             .toolbar {
                 ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                    Button { add() } label: {
+                        Label("Add", systemImage: "plus")
                     }
                 }
             }
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+        } detail: {
+            // Simple details pane for now
+            if let selected = inventions.first {  // placeholder
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(selected.title ?? "Untitled")
+                        .font(.title2)
+                    Text(selected.details ?? "")
+                    if let s = selected.linkString,
+                       let url = URL(string: s) {
+                        Link(s, destination: url)
+                    }
+                }
+                .padding()
+            } else {
+                Text("Select an invention")
             }
         }
     }
 
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
+    // MARK: - Helpers
+    private var filtered: [Invention] {
+        guard !searchText.isEmpty else { return Array(inventions) }
+        let q = searchText.lowercased()
+        return inventions.filter {
+            ($0.title ?? "").lowercased().contains(q) ||
+            ($0.details ?? "").lowercased().contains(q)
         }
     }
-}
 
-private let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
-    return formatter
-}()
+    private func add() {
+        let new = Invention(context: viewContext)
+        new.title = "New invention"
+        new.details = ""
+        new.createdAt = .now
+        try? viewContext.save()
+    }
 
-#Preview {
-    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    private func delete(_ offsets: IndexSet) {
+        offsets.map { filtered[$0] }.forEach(viewContext.delete)
+        try? viewContext.save()
+    }
 }
