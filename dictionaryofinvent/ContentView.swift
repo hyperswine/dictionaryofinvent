@@ -28,51 +28,46 @@ struct ContentView: View {
     ]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 16) {
-                Spacer()
-
-                TextField("Search inventions…", text: $searchText)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(maxWidth: 480)
-                    .font(.title3)                    // larger text
-
-                Spacer(minLength: 0)
-
-                Button(action: add) {
-                    Label("Add", systemImage: "plus")
-                        .labelStyle(.titleAndIcon)
-                }
-                .keyboardShortcut("n", modifiers: [.command])
-            }
-            .padding(.vertical, 12)
-            .padding(.horizontal)
-
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(filtered) { inv in
-                        Button {
-                            editing = inv
+        // Main content
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 16) {
+                ForEach(filtered) { inv in
+                    Button {
+                        editing = inv
+                    } label: {
+                        EntryCard(invention: inv)
+                    }
+                    .buttonStyle(ScaleButtonStyle())
+                    .contextMenu {
+                        Button(role: .destructive) {
+                            delete(inv)
                         } label: {
-                            EntryCard(invention: inv)
-                        }
-                        .buttonStyle(ScaleButtonStyle())
-                        .contextMenu {
-                            Button(role: .destructive) {
-                                delete(inv)
-                            } label: {
-                                Label("Delete", systemImage: "trash")
-                            }
+                            Label("Delete", systemImage: "trash")
                         }
                     }
                 }
-                .padding()
-                .animation(.easeInOut(duration: 0.25), value: filtered)
             }
+            .padding()
+            .animation(.easeInOut(duration: 0.25), value: filtered)
         }
         .sheet(item: $editing) { inv in
             EditInventionView(invention: inv)
                 .environment(\.managedObjectContext, viewContext)
+        }
+        // Put search & add in the unified title‑bar toolbar
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                HStack(spacing: 12) {
+                    TextField("Search inventions…", text: $searchText)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 320)
+
+                    Button(action: add) {
+                        Image(systemName: "plus")
+                    }
+                    .keyboardShortcut("n", modifiers: [.command])
+                }
+            }
         }
     }
 
